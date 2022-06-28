@@ -26,4 +26,4 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: registry.cn-shanghai.aliyuncs.com/store_admin/xs-web-admin:$(date +%s)
+        tags: store_admin/xs-web-admin:$(date +%s)
