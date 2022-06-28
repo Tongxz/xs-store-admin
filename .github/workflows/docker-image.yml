@@ -11,5 +11,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Login to Aliyun Container Registry (ACR)
+      uses: aliyun/acr-login@v1 # 使用阿里云镜像服务action
+      with:
+        login-server: registry.cn-shanghai.aliyuncs.com # 务必正确填写镜像容器服务的登录地址
+        region-id: cn-shanghai # 务必正确填写镜像容器服务的登录地址
+        username: "${{ secrets.DOCKER_USERNAME }}" # 引用GitHub repo设置的镜像容器服务用户名
+        password: "${{ secrets.DOCKER_PASSWORD }}" # 引用GitHub repo设置的镜像容器服务密码
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      env:
+        IMAGE_TAG: ${{ github.sha }} # 用于标记容器版本号
+      run:
+        docker build . --file Dockerfile --tag registry.cn-shanghai.aliyuncs.com/store_admin/xs-web-admin:$IMAGE_TAG .
+        docker push registry.cn-shanghai.aliyuncs.com/store_admin/xs-web-admin:$IMAGE_TAG
