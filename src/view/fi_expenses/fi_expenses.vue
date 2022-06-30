@@ -60,7 +60,12 @@
         <el-table-column align="left" label="支出说明" prop="content" width="120" />
         <el-table-column align="left" label="金额" prop="amount" width="120" />
         <el-table-column align="left" label="支出类型" prop="type" width="120" />
-        <el-table-column align="left" label="支付方式" prop="payment" width="120" />
+        <el-table-column align="left" label="支付方式" prop="payment" width="120" >
+          <template #default="scope">
+            <el-tag v-if="scope.row.payment === 'Alpay' ">支付宝</el-tag>
+            <el-tag v-if="scope.row.payment === 'WeiXin' ">微信</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="经办人" prop="executor" width="120" />
         <el-table-column align="left" label="是否开票" prop="invoice" width="120">
           <template #default="scope">{{ formatBoolean(scope.row.invoice) }}</template>
