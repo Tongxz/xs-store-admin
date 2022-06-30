@@ -4,7 +4,7 @@
 
 const config = {
   appName: 'Xs-Admin-Vue',
-  appLogo: 'https://www.gin-vue-admin.com/img/logo.png',
+  appLogo: 'http://8.133.163.177:8080/api/uploads/file/35b8f7653f4db1259c79da400956c26d_20220630092412.JPG',
   showViteLogo: true
 }
 
