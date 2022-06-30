@@ -27,19 +27,19 @@ const loading = ref(true)
 const dataTimeline = ref([])
 
 const loadCommits = () => {
-  Commits(0).then(({ data }) => {
-    loading.value = false
-    data.forEach((element, index) => {
-      if (element.commit.message && index < 10) {
-        dataTimeline.value.push({
-          from: formatTimeToStr(element.commit.author.date, 'yyyy-MM-dd'),
-          title: element.commit.author.name,
-          showDayAndMonth: true,
-          message: element.commit.message,
-        })
-      }
-    })
-  })
+  // Commits(0).then(({ data }) => {
+  //   loading.value = false
+  //   data.forEach((element, index) => {
+  //     if (element.commit.message && index < 10) {
+  //       dataTimeline.value.push({
+  //         from: formatTimeToStr(element.commit.author.date, 'yyyy-MM-dd'),
+  //         title: element.commit.author.name,
+  //         showDayAndMonth: true,
+  //         message: element.commit.message,
+  //       })
+  //     }
+  //   })
+  // })
 }
 
 loadCommits()
