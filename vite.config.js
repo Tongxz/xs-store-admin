@@ -1,6 +1,5 @@
 import legacyPlugin from '@vitejs/plugin-legacy'
 // import usePluginImport from 'vite-plugin-importer';
-import { viteLogo } from './src/core/config'
 import Banner from 'vite-plugin-banner'
 import * as path from 'path'
 import * as dotenv from 'dotenv'
@@ -22,15 +21,14 @@ export default ({
     }
   }
 
-  viteLogo(process.env)
 
   const timestamp = Date.parse(new Date())
 
   const rollupOptions = {
     output: {
-      entryFileNames: `gva/gin-vue-admin-[name].${timestamp}.js`,
-      chunkFileNames: `js/gin-vue-admin-[name].${timestamp}.js`,
-      assetFileNames: `assets/gin-vue-admin-[name].${timestamp}.[ext]`
+      entryFileNames: `gva/vue-admin-[name].${timestamp}.js`,
+      chunkFileNames: `js/vue-admin-[name].${timestamp}.js`,
+      assetFileNames: `assets/vue-admin-[name].${timestamp}.[ext]`
     }
   }
 
