@@ -1,5 +1,5 @@
-//@author: [bstdn](https://github.com/bstdn)
-//@description: ESlint 语法检测
+// @author: [bstdn](https://github.com/bstdn)
+// @description: ESlint 语法检测
 module.exports = {
   root: true,
   parserOptions: {
