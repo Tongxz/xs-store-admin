@@ -61,11 +61,16 @@
         <el-table-column align="left" label="客户名称" prop="name" width="120" />
         <el-table-column align="left" label="手机号码" prop="mobile" width="120" />
         <el-table-column align="left" label="金额" prop="amount" width="120" />
-        <el-table-column align="left" label="类别" prop="category" width="120" />
+        <el-table-column align="left" label="类别" prop="category" width="120" >
+          <template #default="scope">
+            {{ filterDict(scope.row.category,product_typeOptions) }}
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="收款方式" prop="payment" width="120" >
           <template #default="scope">
-            <el-tag v-if="scope.row.payment === 'Alpay' ">支付宝</el-tag>
-            <el-tag v-if="scope.row.payment === 'WeiXin' ">微信</el-tag>
+            <el-tag>
+              {{ filterDict(scope.row.payment,Pay_byOptions) }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="是否开票" prop="invoice" width="120">
@@ -105,13 +110,13 @@
           <el-input-number v-model="formData.amount" :precision="2" clearable />
         </el-form-item>
         <el-form-item label="类别:">
-          <el-select v-model="formData.category" placeholder="请选择">
-            <el-option v-for="item in options" :key="item.code" :label="item.name" :value="item.code" />
+          <el-select v-model="formData.category" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in product_typeOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="收款方式:">
-          <el-select v-model="formData.payment" placeholder="请选择">
-            <el-option v-for="item in pay" :key="item.code" :label="item.name" :value="item.code" />
+          <el-select v-model="formData.payment" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in Pay_byOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="是否开票:">
@@ -158,11 +163,13 @@ import {
 } from '@/api/fi_income'
 
 // 全量引入格式化工具 请按需保留
-import { formatDate, formatBoolean } from '@/utils/format'
+import {formatDate, formatBoolean, getDictFunc, filterDict} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 
 // 自动化生成的字典（可能为空）以及字段
+const product_typeOptions = ref([])
+const Pay_byOptions = ref([])
 const formData = ref({
   name: '',
   mobile: undefined,
@@ -240,11 +247,16 @@ getTableData()
 // ============== 表格控制部分结束 ===============
 
 // 获取需要的字典 可能为空 按需保留
-const setOptions = async() => {
+const setOptions = async () =>{
+  product_typeOptions.value = await getDictFunc('product_type')
+}// 获取需要的字典 可能为空 按需保留
+const setPay_byOptions = async () =>{
+  Pay_byOptions.value = await getDictFunc('pay_by')
 }
 
 // 获取需要的字典 可能为空 按需保留
 setOptions()
+setPay_byOptions()
 
 // 多选数据
 const multipleSelection = ref([])
