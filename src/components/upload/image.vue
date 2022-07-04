@@ -58,6 +58,7 @@ const beforeImageUpload = (file) => {
 }
 
 const handleImageSuccess = (res) => {
+  console.log(res)
   const { data } = res
   if (data.file) {
     emit('on-success', data.file.url)

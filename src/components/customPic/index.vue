@@ -9,7 +9,15 @@
       <img v-else :src="noAvatar" class="avatar">
     </template>
     <template v-if="picType === 'file'">
-      <img :src="file" class="file">
+      <el-image
+          style="width: 100px; height: 100px"
+          :src="file"
+          :preview-src-list="[file]"
+          :initial-index="4"
+          z-index="10000"
+          :append-to-body='true'
+          fit="cover"
+      />
     </template>
   </span>
 </template>
