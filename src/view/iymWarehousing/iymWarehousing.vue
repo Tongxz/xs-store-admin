@@ -243,7 +243,7 @@ getTableData()
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
     foodOptions.value = await getDictFunc('food')
-    teaOptions.value = await getDictFunc('food')
+    teaOptions.value = await getDictFunc('tea')
     pay_byOptions.value = await getDictFunc('pay_by')
 }
 
