@@ -2,14 +2,17 @@
   <div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
-        <el-form-item label="类型">
-          <el-input v-model="searchInfo.type" placeholder="搜索条件" />
-        </el-form-item>
-        <el-form-item label="物品名称">
+        <el-form-item label="入库名称">
           <el-input v-model="searchInfo.name" placeholder="搜索条件" />
         </el-form-item>
-        <el-form-item label="物品类型">
-          <el-input v-model="searchInfo.item_type" placeholder="搜索条件" />
+        <el-form-item label="所属部门">
+          <el-input v-model="searchInfo.department" placeholder="搜索条件" />
+        </el-form-item>
+        <el-form-item label="物品类别">
+          <el-input v-model="searchInfo.type" placeholder="搜索条件" />
+        </el-form-item>
+        <el-form-item label="付款方式">
+          <el-input v-model="searchInfo.payment" placeholder="搜索条件" />
         </el-form-item>
         <el-form-item>
           <el-button size="small" type="primary" icon="search" @click="onSubmit">查询</el-button>
@@ -43,22 +46,30 @@
         <el-table-column align="left" label="日期" width="180">
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="类型" prop="type" width="120" />
-        <el-table-column align="left" label="物品名称" prop="name" width="120" />
-        <el-table-column align="left" label="部门" prop="department" width="120" >
+        <el-table-column align="left" label="物品图片" prop="imgUrl" width="120" >
+          <template #default="scope">
+            <CustomPic pic-type="file" :pic-src="scope.row.imgUrl" />
+          </template>
         </el-table-column>
-        <el-table-column align="left" label="物品类型" prop="item_type" width="120" >
-
+        <el-table-column align="left" label="入库名称" prop="name" width="120" />
+        <el-table-column align="left" label="所属部门" prop="department" width="120" />
+        <el-table-column align="left" label="物品类别" prop="type" width="120">
+            <template #default="scope">
+            {{ filterDict(scope.row.type,foodOptions) }}
+            </template>
         </el-table-column>
-        <el-table-column align="left" label="单位" prop="unit" width="120" />
-        <el-table-column align="left" label="数量" prop="quantity" width="120">
+        <el-table-column align="left" label="付款方式" prop="payment" width="120">
+            <template #default="scope">
+            {{ filterDict(scope.row.payment,pay_byOptions) }}
+            </template>
         </el-table-column>
-        <el-table-column align="left" label="单价" prop="unit_price" width="120" />
-        <el-table-column align="left" label="金额" prop="amount" width="120" />
+        <el-table-column align="left" label="数量" prop="quantity" width="120" />
+        <el-table-column align="left" label="单价" prop="unitPrice" width="120" />
+        <el-table-column align="left" label="总金额" prop="amount" width="120" />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
-            <el-button type="text" icon="edit" size="small" class="table-button" @click="updateOutStockFunc(scope.row)">变更</el-button>
+            <el-button type="text" icon="edit" size="small" class="table-button" @click="updateWarehousingFunc(scope.row)">变更</el-button>
             <el-button type="text" icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
             </template>
         </el-table-column>
@@ -77,30 +88,40 @@
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
       <el-form :model="formData" label-position="right" label-width="80px">
-        <el-form-item label="类型:">
-          <el-input v-model="formData.type" clearable placeholder="请输入" />
+        <el-form-item label="物品图片:">
+          <el-upload
+              class="avatar-uploader"
+              action
+              :http-request="wareUpload"
+              :show-file-list="false"
+              :before-upload="beforeAvatarUpload">
+            <img v-if="formData.imgUrl" :src="formData.imgUrl" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
         </el-form-item>
-        <el-form-item label="物品名称:">
+        <el-form-item label="入库名称:">
           <el-input v-model="formData.name" clearable placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="部门:">
-          <el-select v-model="formData.department" @change="getDepartment" placeholder="请选择">
-            <el-option v-for="item in options" :key="item.code" :label="item.name" :value="item.code" />
+        <el-form-item label="所属部门:">
+          <el-input v-model="formData.department" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="物品类别:">
+          <el-select v-model="formData.type" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in foodOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="物品类型:">
-          <el-input v-model="formData.item_type" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="单位:">
-          <el-input v-model="formData.unit" clearable placeholder="请输入" />
+        <el-form-item label="付款方式:">
+          <el-select v-model="formData.payment" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in pay_byOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="数量:">
-          <el-input v-model="formData.quantity" clearable placeholder="请输入" />
+          <el-input v-model.number="formData.quantity" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="单价:">
-          <el-input-number v-model="formData.unit_price"  style="width:100%" :precision="2" clearable />
+          <el-input-number v-model="formData.unitPrice"  style="width:100%" :precision="2" clearable />
         </el-form-item>
-        <el-form-item label="金额:">
+        <el-form-item label="总金额:">
           <el-input-number v-model="formData.amount"  style="width:100%" :precision="2" clearable />
         </el-form-item>
         <el-form-item label="备注:">
@@ -119,42 +140,38 @@
 
 <script>
 export default {
-  name: 'OutStock'
+  name: 'Warehousing'
 }
 </script>
 
 <script setup>
 import {
-  createOutStock,
-  deleteOutStock,
-  deleteOutStockByIds,
-  updateOutStock,
-  findOutStock,
-  getOutStockList
-} from '@/api/iymOutStock'
+  createWarehousing,
+  deleteWarehousing,
+  deleteWarehousingByIds,
+  updateWarehousing,
+  findWarehousing,
+  getWarehousingList
+} from '@/api/iymWarehousing'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import CustomPic from '@/components/customPic/index.vue'
 import { ref } from 'vue'
-const options = ref([
-  {
-    name: '餐饮部',
-    code: 'food'
-  }, {
-    name: '茶艺部',
-    code: 'tea'
-  }
-])
+import {upLoad} from "@/api/upload";
+
 // 自动化生成的字典（可能为空）以及字段
-const intOptions = ref([])
+const foodOptions = ref([])
+const pay_byOptions = ref([])
 const formData = ref({
-        type: '',
+        imgUrl: '',
         name: '',
-        item_type: '',
-        unit: '',
-        quantity: undefined,
-        unit_price: 0,
+        department: '',
+        type: undefined,
+        payment: undefined,
+        quantity: 0,
+        unitPrice: 0,
         amount: 0,
         remarks: '',
         })
@@ -192,7 +209,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getOutStockList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getWarehousingList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -207,7 +224,8 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
-    intOptions.value = await getDictFunc('int')
+    foodOptions.value = await getDictFunc('food')
+    pay_byOptions.value = await getDictFunc('pay_by')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -228,7 +246,7 @@ const deleteRow = (row) => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(() => {
-            deleteOutStockFunc(row)
+            deleteWarehousingFunc(row)
         })
     }
 
@@ -250,7 +268,7 @@ const onDelete = async() => {
         multipleSelection.value.map(item => {
           ids.push(item.ID)
         })
-      const res = await deleteOutStockByIds({ ids })
+      const res = await deleteWarehousingByIds({ ids })
       if (res.code === 0) {
         ElMessage({
           type: 'success',
@@ -268,19 +286,19 @@ const onDelete = async() => {
 const type = ref('')
 
 // 更新行
-const updateOutStockFunc = async(row) => {
-    const res = await findOutStock({ ID: row.ID })
+const updateWarehousingFunc = async(row) => {
+    const res = await findWarehousing({ ID: row.ID })
     type.value = 'update'
     if (res.code === 0) {
-        formData.value = res.data.restock
+        formData.value = res.data.rewarehousing
         dialogFormVisible.value = true
     }
 }
 
 
 // 删除行
-const deleteOutStockFunc = async (row) => {
-    const res = await deleteOutStock({ ID: row.ID })
+const deleteWarehousingFunc = async (row) => {
+    const res = await deleteWarehousing({ ID: row.ID })
     if (res.code === 0) {
         ElMessage({
                 type: 'success',
@@ -306,12 +324,13 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
-        type: '',
+        imgUrl: '',
         name: '',
-        item_type: '',
-        unit: '',
-        quantity: undefined,
-        unit_price: 0,
+        department: '',
+        type: undefined,
+        payment: undefined,
+        quantity: 0,
+        unitPrice: 0,
         amount: 0,
         remarks: '',
         }
@@ -319,15 +338,16 @@ const closeDialog = () => {
 // 弹窗确定
 const enterDialog = async () => {
       let res
+  console.log(formData.value)
       switch (type.value) {
         case 'create':
-          res = await createOutStock(formData.value)
+          res = await createWarehousing(formData.value)
           break
         case 'update':
-          res = await updateOutStock(formData.value)
+          res = await updateWarehousing(formData.value)
           break
         default:
-          res = await createOutStock(formData.value)
+          res = await createWarehousing(formData.value)
           break
       }
       if (res.code === 0) {
@@ -339,7 +359,59 @@ const enterDialog = async () => {
         getTableData()
       }
 }
-</script>
+const wareUpload  = (files) =>  {
+  let formFile = new FormData
+  console.log(files)
+  formFile.append('file',files.file)
+  console.log(formFile)
+  upLoad(formFile).then((data) => {
+    if (data && data.code === 0) {
+      console.log(data.data.file.url)
+      formData.value.imgUrl = data.data.file.url
+      console.log(formData)
+    } else {
+      this.$message.error(data.msg)
+    }
+  })
+}
+const beforeAvatarUpload= (file) =>  {
+  const isJPG = file.type === 'image/jpeg';
+  const isLt2M = file.size / 1024 / 1024 < 10;
 
+  if (!isJPG) {
+    this.$message.error('上传头像图片只能是 JPG 格式!');
+  }
+  if (!isLt2M) {
+    this.$message.error('上传头像图片大小不能超过 2MB!');
+  }
+  return isJPG && isLt2M;
+}
+</script>
+<style scoped>
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+</style>
 <style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
 </style>

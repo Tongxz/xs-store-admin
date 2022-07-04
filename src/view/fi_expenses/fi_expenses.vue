@@ -60,6 +60,10 @@
         <el-table-column align="left" label="支出说明" prop="content" width="120" />
         <el-table-column align="left" label="金额" prop="amount" width="120" />
         <el-table-column align="left" label="支出部门" prop="department" width="120" >
+          <template #default="scope" >
+            <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
+            <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
+          </template>
         </el-table-column>
         <el-table-column align="left" label="支出类型" prop="type" width="120" >
           <template #default="scope" >
@@ -69,8 +73,9 @@
         </el-table-column>
         <el-table-column align="left" label="支付方式" prop="payment" width="120" >
           <template #default="scope">
-            <el-tag v-if="scope.row.payment === 'Alpay' ">支付宝</el-tag>
-            <el-tag v-if="scope.row.payment === 'WeiXin' ">微信</el-tag>
+            <el-tag>
+              {{ filterDict(scope.row.payment,Pay_byOptions) }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="经办人" prop="executor" width="120" />
@@ -169,18 +174,8 @@ const options = ref([
     code: 'tea'
   }
 ])
-const pay = ref([
-  {
-    name: '支付宝',
-    code: 'Alpay'
-  },
-  {
-    name: '微信',
-    code: 'WeiXin'
-  }
-])
 // 自动化生成的字典（可能为空）以及字段
-const departmentOptions = ref([])
+let departmentOptions = ref([])
 const Pay_byOptions = ref([])
 const teaOptions = ref([])
 const foodOptions = ref([])
@@ -314,6 +309,12 @@ const updateExpensesFunc = async(row) => {
   type.value = 'update'
   if (res.code === 0) {
     formData.value = res.data.reexpenses
+    if (formData.value.department === 'food'){
+      departmentOptions.value = foodOptions.value
+    }
+    if (formData.value.department === 'tea'){
+      departmentOptions.value = teaOptions.value
+    }
     dialogFormVisible.value = true
   }
 }
@@ -342,7 +343,12 @@ const openDialog = () => {
   dialogFormVisible.value = true
 }
 const getDepartment = (value) => {
-  setOptions(value)
+  if (value === 'food'){
+    departmentOptions.value = foodOptions.value
+  }
+  if (value === 'tea'){
+    departmentOptions.value = teaOptions.value
+  }
 }
 // 关闭弹窗
 const closeDialog = () => {
@@ -352,6 +358,7 @@ const closeDialog = () => {
     amount: 0,
     type: 0,
     payment: '',
+    department: '',
     executor: '',
     invoice: false,
     note: '',
