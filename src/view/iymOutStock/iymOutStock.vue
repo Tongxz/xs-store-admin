@@ -48,10 +48,6 @@
         <el-table-column align="left" label="物品类型" prop="item_type" width="120" />
         <el-table-column align="left" label="单位" prop="unit" width="120" />
         <el-table-column align="left" label="数量" prop="quantity" width="120">
-            <template #default="scope">
-            {{ filterDict(scope.row.quantity,intOptions) }}
-            </template>
-        </el-table-column>
         <el-table-column align="left" label="单价" prop="unit_price" width="120" />
         <el-table-column align="left" label="金额" prop="amount" width="120" />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
@@ -89,9 +85,7 @@
           <el-input v-model="formData.unit" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="数量:">
-          <el-select v-model="formData.quantity" placeholder="请选择" style="width:100%" clearable>
-            <el-option v-for="(item,key) in intOptions" :key="key" :label="item.label" :value="item.value" />
-          </el-select>
+          <el-input v-model="formData.quantity" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="单价:">
           <el-input-number v-model="formData.unit_price"  style="width:100%" :precision="2" clearable />
