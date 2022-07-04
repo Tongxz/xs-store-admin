@@ -14,7 +14,6 @@
           :src="file"
           :preview-src-list="[file]"
           :initial-index="4"
-          z-index="10000"
           :append-to-body='true'
           fit="cover"
       />
