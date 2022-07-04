@@ -45,11 +45,18 @@
         </el-table-column>
         <el-table-column align="left" label="类型" prop="type" width="120" />
         <el-table-column align="left" label="物品名称" prop="name" width="120" />
-        <el-table-column align="left" label="部门" prop="department" width="120" >
-        </el-table-column>
-        <el-table-column align="left" label="物品类型" prop="item_type" width="120" >
-
-        </el-table-column>
+          <el-table-column align="left" label="所属部门" prop="department" width="120" >
+            <template #default="scope" >
+              <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
+              <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column align="left" label="物品类别" prop="type" width="120">
+            <template #default="scope" >
+              <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
+              <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
+            </template>
+          </el-table-column>
         <el-table-column align="left" label="单位" prop="unit" width="120" />
         <el-table-column align="left" label="数量" prop="quantity" width="120">
         </el-table-column>
@@ -77,19 +84,18 @@
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
       <el-form :model="formData" label-position="right" label-width="80px">
-        <el-form-item label="类型:">
-          <el-input v-model="formData.type" clearable placeholder="请输入" />
-        </el-form-item>
         <el-form-item label="物品名称:">
           <el-input v-model="formData.name" clearable placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="部门:">
-          <el-select v-model="formData.department" @change="getDepartment" placeholder="请选择">
-            <el-option v-for="item in options" :key="item.code" :label="item.name" :value="item.code" />
+        <el-form-item label="所属部门:">
+          <el-select v-model="formData.department" @change="getDepartment">
+            <el-option v-for="(item,key) in options" :key="key" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="物品类型:">
-          <el-input v-model="formData.item_type" clearable placeholder="请输入" />
+        <el-form-item label="物品类别:">
+          <el-select v-model="formData.type" placeholder="请选择" clearable>
+            <el-option v-for="(item,key) in departmentOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="单位:">
           <el-input v-model="formData.unit" clearable placeholder="请输入" />
@@ -139,15 +145,19 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 const options = ref([
   {
-    name: '餐饮部',
-    code: 'food'
+    label: '餐饮部',
+    value: 'food'
   }, {
-    name: '茶艺部',
-    code: 'tea'
+    label: '茶艺部',
+    value: 'tea'
   }
 ])
 // 自动化生成的字典（可能为空）以及字段
 const intOptions = ref([])
+const foodOptions = ref([])
+const teaOptions = ref([])
+const pay_byOptions = ref([])
+const departmentOptions = ref([])
 const formData = ref({
         type: '',
         name: '',
@@ -208,11 +218,21 @@ getTableData()
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
     intOptions.value = await getDictFunc('int')
+    foodOptions.value = await getDictFunc('food')
+    teaOptions.value = await getDictFunc('tea')
+    pay_byOptions.value = await getDictFunc('pay_by')
 }
 
 // 获取需要的字典 可能为空 按需保留
 setOptions()
-
+const getDepartment = (value) => {
+  if (value === 'food'){
+    departmentOptions.value = foodOptions.value
+  }
+  if (value === 'tea'){
+    departmentOptions.value = teaOptions.value
+  }
+}
 
 // 多选数据
 const multipleSelection = ref([])
@@ -273,6 +293,12 @@ const updateOutStockFunc = async(row) => {
     type.value = 'update'
     if (res.code === 0) {
         formData.value = res.data.restock
+      if (formData.value.department === 'food'){
+        departmentOptions.value = foodOptions.value
+      }
+      if (formData.value.department === 'tea'){
+        departmentOptions.value = teaOptions.value
+      }
         dialogFormVisible.value = true
     }
 }

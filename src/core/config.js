@@ -4,7 +4,7 @@
 
 const config = {
   appName: 'Xs-Admin-Vue',
-  appLogo: 'https://xs-qingshi.oss-cn-shanghai.aliyuncs.com/oss://xs-qingshi//uploads/2022-06-30/IMG_4313.JPG',
+  appLogo: 'https://xs-qingshi.oss-cn-shanghai.aliyuncs.com/oss%3A//xs-qingshi//uploads/2022-06-30/IMG_4313.JPG',
   showViteLogo: true
 }
 

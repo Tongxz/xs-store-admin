@@ -59,9 +59,10 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="物品类别" prop="type" width="120">
-            <template #default="scope">
-              <el-tag>{{ filterDict(scope.row.type,departmentOptions) }}</el-tag>
-            </template>
+          <template #default="scope" >
+            <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
+            <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
+          </template>
         </el-table-column>
         <el-table-column align="left" label="付款方式" prop="payment" width="120">
             <template #default="scope">

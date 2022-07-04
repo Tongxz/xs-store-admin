@@ -61,15 +61,22 @@
         <el-table-column align="left" label="客户名称" prop="name" width="120" />
         <el-table-column align="left" label="手机号码" prop="mobile" width="120" />
         <el-table-column align="left" label="金额" prop="amount" width="120" />
-        <el-table-column align="left" label="类别" prop="category" width="120" >
-          <template #default="scope">
-            {{ filterDict(scope.row.category,product_typeOptions) }}
+        <el-table-column align="left" label="所属部门" prop="department" width="120" >
+          <template #default="scope" >
+            <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
+            <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="物品类别" prop="category" width="120">
+          <template #default="scope" >
+            <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.category,foodOptions) }}</el-tag>
+            <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.category,teaOptions) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="收款方式" prop="payment" width="120" >
           <template #default="scope">
             <el-tag>
-              {{ filterDict(scope.row.payment,Pay_byOptions) }}
+              {{ filterDict(scope.row.payment,pay_byOptions) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -109,14 +116,19 @@
         <el-form-item label="金额:">
           <el-input-number v-model="formData.amount" :precision="2" clearable />
         </el-form-item>
-        <el-form-item label="类别:">
-          <el-select v-model="formData.category" placeholder="请选择" style="width:100%" clearable>
-            <el-option v-for="(item,key) in product_typeOptions" :key="key" :label="item.label" :value="item.value" />
+        <el-form-item label="所属部门:">
+          <el-select v-model="formData.department" @change="getDepartment">
+            <el-option v-for="(item,key) in options" :key="key" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物品类别:">
+          <el-select v-model="formData.category" placeholder="请选择" clearable>
+            <el-option v-for="(item,key) in departmentOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="收款方式:">
           <el-select v-model="formData.payment" placeholder="请选择" style="width:100%" clearable>
-            <el-option v-for="(item,key) in Pay_byOptions" :key="key" :label="item.label" :value="item.value" />
+            <el-option v-for="(item,key) in pay_byOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="是否开票:">
@@ -169,7 +181,10 @@ import { ref } from 'vue'
 
 // 自动化生成的字典（可能为空）以及字段
 const product_typeOptions = ref([])
-const Pay_byOptions = ref([])
+const foodOptions = ref([])
+const teaOptions = ref([])
+const pay_byOptions = ref([])
+const departmentOptions = ref([])
 const formData = ref({
   name: '',
   mobile: undefined,
@@ -182,18 +197,11 @@ const formData = ref({
 })
 const options = ref([
   {
-    name: '产品',
-    code: 'gift'
-  }
-])
-const pay = ref([
-  {
-    name: '支付宝',
-    code: 'Alpay'
-  },
-  {
-    name: '微信',
-    code: 'WeiXin'
+    label: '餐饮部',
+    value: 'food'
+  }, {
+    label: '茶艺部',
+    value: 'tea'
   }
 ])
 
@@ -248,16 +256,21 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
-  product_typeOptions.value = await getDictFunc('product_type')
+  foodOptions.value = await getDictFunc('food')
+  teaOptions.value = await getDictFunc('tea')
+  pay_byOptions.value = await getDictFunc('pay_by')
 }// 获取需要的字典 可能为空 按需保留
-const setPay_byOptions = async () =>{
-  Pay_byOptions.value = await getDictFunc('pay_by')
-}
 
 // 获取需要的字典 可能为空 按需保留
 setOptions()
-setPay_byOptions()
-
+const getDepartment = (value) => {
+  if (value === 'food'){
+    departmentOptions.value = foodOptions.value
+  }
+  if (value === 'tea'){
+    departmentOptions.value = teaOptions.value
+  }
+}
 // 多选数据
 const multipleSelection = ref([])
 // 多选
@@ -316,6 +329,12 @@ const updateIncomeFunc = async(row) => {
   type.value = 'update'
   if (res.code === 0) {
     formData.value = res.data.reincome
+    if (formData.value.department === 'food'){
+      departmentOptions.value = foodOptions.value
+    }
+    if (formData.value.department === 'tea'){
+      departmentOptions.value = teaOptions.value
+    }
     dialogFormVisible.value = true
   }
 }
