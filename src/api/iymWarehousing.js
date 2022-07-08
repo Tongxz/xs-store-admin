@@ -95,3 +95,9 @@ export const getWarehousingList = (params) => {
     params
   })
 }
+export const getWarehousingName = () => {
+  return service({
+    url: '/warehousing/getWarehousingName',
+    method: 'get'
+  })
+}
