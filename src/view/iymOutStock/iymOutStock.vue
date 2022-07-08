@@ -85,15 +85,17 @@
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
       <el-form :model="formData" label-position="right" label-width="80px">
         <el-form-item label="物品名称:">
-          <el-input v-model="formData.name" clearable placeholder="请输入" />
+          <el-select v-model="formData.name" @change="getWarehousingInfo">
+            <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.ID"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="所属部门:">
-          <el-select v-model="formData.department" @change="getDepartment">
+          <el-select v-model="formData.department" :disabled="true" @change="getDepartment">
             <el-option v-for="(item,key) in options" :key="key" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="物品类别:">
-          <el-select v-model="formData.type" placeholder="请选择" clearable>
+          <el-select v-model="formData.type" disabled placeholder="请选择">
             <el-option v-for="(item,key) in departmentOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -143,6 +145,7 @@ import {
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
+import {findWarehousing, getWarehousingName} from "@/api/iymWarehousing";
 const options = ref([
   {
     label: '餐饮部',
@@ -158,6 +161,7 @@ const foodOptions = ref([])
 const teaOptions = ref([])
 const pay_byOptions = ref([])
 const departmentOptions = ref([])
+const WarehousingName = ref([])
 const formData = ref({
         type: '',
         name: '',
@@ -203,6 +207,12 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   const table = await getOutStockList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const Warehousing = await getWarehousingName()
+  if (Warehousing.code === 0){
+    console.log(Warehousing)
+    WarehousingName.value = Warehousing.data.rewarehousing
+    console.log(WarehousingName)
+  }
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -232,6 +242,21 @@ const getDepartment = (value) => {
   if (value === 'tea'){
     departmentOptions.value = teaOptions.value
   }
+}
+const getWarehousingInfo = async (value) => {
+  console.log(value)
+  const res = await findWarehousing ({ID: value})
+  if (res.code === 0) {
+    formData.value = res.data.rewarehousing
+    if (formData.value.department === 'food'){
+      departmentOptions.value = foodOptions.value
+    }
+    if (formData.value.department === 'tea'){
+      departmentOptions.value = teaOptions.value
+    }
+  }
+  console.log(res.data)
+  console.log(formData)
 }
 
 // 多选数据
