@@ -124,13 +124,16 @@
           </el-select>
         </el-form-item>
         <el-form-item label="数量:">
-          <el-input v-model.number="formData.quantity" clearable placeholder="请输入" />
+          <el-input @change="setAmount" v-model.number="formData.quantity" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="单位:">
+          <el-input v-model="formData.unit" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="单价:">
-          <el-input-number v-model="formData.unitPrice"  style="width:100%" :precision="2" clearable />
+          <el-input-number @change="setAmount" v-model="formData.unitPrice"  style="width:100%" :precision="2" clearable />
         </el-form-item>
         <el-form-item label="总金额:">
-          <el-input-number v-model="formData.amount"  style="width:100%" :precision="2" clearable />
+          <el-input-number disabled v-model="formData.amount"  style="width:100%" :precision="2" clearable />
         </el-form-item>
         <el-form-item label="备注:">
           <el-input v-model="formData.remarks" clearable placeholder="请输入" />
@@ -159,7 +162,7 @@ import {
   deleteWarehousingByIds,
   updateWarehousing,
   findWarehousing,
-  getWarehousingList
+  getWarehousingList, getWarehousingName
 } from '@/api/iymWarehousing'
 
 // 全量引入格式化工具 请按需保留
@@ -190,6 +193,7 @@ const formData = ref({
         type: undefined,
         payment: undefined,
         quantity: 0,
+        unit: '',
         unitPrice: 0,
         amount: 0,
         remarks: '',
@@ -229,6 +233,8 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   const table = await getWarehousingList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const Name = await getWarehousingName()
+  console.log(Name)
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -258,7 +264,11 @@ const getDepartment = (value) => {
     departmentOptions.value = teaOptions.value
   }
 }
-
+const setAmount = (value) => {
+  if (formData.value.unitPrice && formData.value.quantity) {
+    formData.value.amount = formData.value.unitPrice* formData.value.quantity
+  }
+}
 // 多选数据
 const multipleSelection = ref([])
 // 多选
@@ -357,15 +367,16 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
-        imgUrl: '',
-        name: '',
-        department: '',
-        type: undefined,
-        payment: undefined,
-        quantity: 0,
-        unitPrice: 0,
-        amount: 0,
-        remarks: '',
+      imgUrl: '',
+      name: '',
+      department: '',
+      type: undefined,
+      payment: undefined,
+      quantity: 0,
+      unit: '',
+      unitPrice: 0,
+      amount: 0,
+      remarks: '',
         }
 }
 // 弹窗确定
