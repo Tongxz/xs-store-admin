@@ -43,7 +43,6 @@
         <el-table-column align="left" label="日期" width="180">
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="类型" prop="type" width="120" />
         <el-table-column align="left" label="物品名称" prop="name" width="120" />
           <el-table-column align="left" label="所属部门" prop="department" width="120" >
             <template #default="scope" >
@@ -60,7 +59,8 @@
         <el-table-column align="left" label="单位" prop="unit" width="120" />
         <el-table-column align="left" label="数量" prop="quantity" width="120">
         </el-table-column>
-        <el-table-column align="left" label="单价" prop="unit_price" width="120" />
+
+        <el-table-column align="left" label="单价" prop="unitPrice" width="120" />
         <el-table-column align="left" label="金额" prop="amount" width="120" />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
         <el-table-column align="left" label="按钮组">
@@ -100,16 +100,16 @@
           </el-select>
         </el-form-item>
         <el-form-item label="单位:">
-          <el-input v-model="formData.unit" clearable placeholder="请输入" />
+          <el-input v-model="formData.unit" disabled placeholder="请输入" />
         </el-form-item>
         <el-form-item label="数量:">
-          <el-input v-model="formData.quantity" clearable placeholder="请输入" />
+          <el-input-number v-model="formData.quantity" min="1" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="单价:">
-          <el-input-number v-model="formData.unit_price"  style="width:100%" :precision="2" clearable />
+          <el-input-number v-model="formData.unitPrice" disabled  :precision="2" clearable />
         </el-form-item>
         <el-form-item label="金额:">
-          <el-input-number v-model="formData.amount"  style="width:100%" :precision="2" clearable />
+          <el-input-number v-model="formData.amount"  :precision="2" clearable />
         </el-form-item>
         <el-form-item label="备注:">
           <el-input v-model="formData.remarks" clearable placeholder="请输入" />
@@ -164,11 +164,12 @@ const departmentOptions = ref([])
 const WarehousingName = ref([])
 const formData = ref({
         type: '',
+        wareId: 0,
         name: '',
         item_type: '',
         unit: '',
-        quantity: undefined,
-        unit_price: 0,
+        quantity: 1,
+        unitPrice: 0,
         amount: 0,
         remarks: '',
         })
@@ -247,7 +248,14 @@ const getWarehousingInfo = async (value) => {
   console.log(value)
   const res = await findWarehousing ({ID: value})
   if (res.code === 0) {
-    formData.value = res.data.rewarehousing
+    console.log(res.data.rewarehousing)
+    formData.value.wareId = res.data.rewarehousing.ID
+    formData.value.type = res.data.rewarehousing.type
+    formData.value.name = res.data.rewarehousing.name
+    formData.value.item_type = res.data.rewarehousing.item_type
+    formData.value.unit = res.data.rewarehousing.unit
+    formData.value.unitPrice = res.data.rewarehousing.unitPrice
+    formData.value.department = res.data.rewarehousing.department
     if (formData.value.department === 'food'){
       departmentOptions.value = foodOptions.value
     }
