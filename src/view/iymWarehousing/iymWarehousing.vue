@@ -69,7 +69,8 @@
               <el-tag>{{ filterDict(scope.row.payment,pay_byOptions) }}</el-tag>
             </template>
         </el-table-column>
-        <el-table-column align="left" label="数量" prop="quantity" width="120" />
+        <el-table-column align="left" label="入库数量" prop="quantity" width="120" />
+          <el-table-column align="left" label="库存余量" prop="margin" width="120"/>
         <el-table-column align="left" label="单价" prop="unitPrice" width="120" />
         <el-table-column align="left" label="总金额" prop="amount" width="120" />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
@@ -196,6 +197,7 @@ const formData = ref({
         unit: '',
         unitPrice: 0,
         amount: 0,
+        margin: 0,
         remarks: '',
         })
 
@@ -376,6 +378,7 @@ const closeDialog = () => {
       unit: '',
       unitPrice: 0,
       amount: 0,
+      margin: 0,
       remarks: '',
         }
 }
@@ -385,6 +388,7 @@ const enterDialog = async () => {
   console.log(formData.value)
       switch (type.value) {
         case 'create':
+          formData.value.margin = formData.value.quantity
           res = await createWarehousing(formData.value)
           break
         case 'update':
