@@ -84,7 +84,7 @@
           <template #default="scope">{{ formatBoolean(scope.row.invoice) }}</template>
         </el-table-column>
         <el-table-column align="left" label="负责人" prop="waiter" width="120" />
-        <el-table-column align="left" label="备注" prop="note" width="120" />
+        <el-table-column align="left" label="备注" show-overflow-tooltip prop="note" width="120" />
         <el-table-column align="left" label="按钮组">
           <template #default="scope">
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateIncomeFunc(scope.row)">变更
@@ -144,6 +144,17 @@
         <el-form-item label="负责人:">
           <el-input v-model="formData.waiter" clearable placeholder="请输入" />
         </el-form-item>
+        <el-form-item label="收入日期:">
+          <el-date-picker
+              v-model="formData.incomeData"
+              type="date"
+              :placeholder="'请选择时间'"
+              :disabled-date="disabledDate"
+              size="small"
+              format="YYYY/MM/DD"
+              value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
         <el-form-item label="备注:">
           <el-input v-model="formData.note" clearable placeholder="请输入" />
         </el-form-item>
@@ -192,6 +203,7 @@ const formData = ref({
   invoice: false,
   waiter: '',
   category: '',
+  incomeData: '',
   payment: '',
   note: '',
 })
@@ -238,7 +250,9 @@ const handleCurrentChange = (val) => {
   page.value = val
   getTableData()
 }
-
+const disabledDate = (time) => {
+  return time.getTime() > Date.now()
+}
 // 查询
 const getTableData = async() => {
   const table = await getIncomeList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
@@ -326,6 +340,7 @@ const type = ref('')
 // 更新行
 const updateIncomeFunc = async(row) => {
   const res = await findIncome({ ID: row.ID })
+  console.log(res)
   type.value = 'update'
   if (res.code === 0) {
     formData.value = res.data.reincome
@@ -378,6 +393,7 @@ const closeDialog = () => {
 // 弹窗确定
 const enterDialog = async() => {
   let res
+  console.log(formData.value)
   switch (type.value) {
     case 'create':
       res = await createIncome(formData.value)
