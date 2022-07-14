@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:14.16
 
 WORKDIR /gva_web/
 COPY . .
