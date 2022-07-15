@@ -56,7 +56,7 @@
       >
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="日期" width="180">
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+          <template #default="scope">{{ formatDateTime(scope.row.incomeData) }}</template>
         </el-table-column>
         <el-table-column align="left" label="客户名称" prop="name" width="120" />
         <el-table-column align="left" label="手机号码" prop="mobile" width="120" />
@@ -186,7 +186,7 @@ import {
 } from '@/api/fi_income'
 
 // 全量引入格式化工具 请按需保留
-import {formatDate, formatBoolean, getDictFunc, filterDict} from '@/utils/format'
+import {formatDateTime, formatBoolean, getDictFunc, filterDict} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 
