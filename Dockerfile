@@ -9,6 +9,7 @@ FROM nginx:alpine
 LABEL MAINTAINER="qingshia@foxmail.com"
 
 COPY .docker-compose/nginx/conf.d/my.conf /etc/nginx/conf.d/my.conf
+COPY .docker-compose/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=0 /gva_web/dist /usr/share/nginx/html
 RUN cat /etc/nginx/nginx.conf
 RUN cat /etc/nginx/conf.d/my.conf
