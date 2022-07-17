@@ -63,12 +63,14 @@
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
+            <el-tag v-if="scope.row.department === 'other'">茶艺部</el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="支出类型" prop="type" width="120" >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
+            <el-tag v-if="scope.row.department === 'other'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="支付方式" prop="payment" width="120" >
@@ -172,6 +174,9 @@ const options = ref([
   }, {
     name: '茶艺部',
     code: 'tea'
+  }, {
+    name: '其他',
+    code: 'other'
   }
 ])
 // 自动化生成的字典（可能为空）以及字段
@@ -179,6 +184,7 @@ let departmentOptions = ref([])
 const Pay_byOptions = ref([])
 const teaOptions = ref([])
 const foodOptions = ref([])
+const otherOptions = ref([])
 const formData = ref({
   content: '',
   amount: 0,
@@ -244,6 +250,7 @@ const setFoodOptions = async(data) => {
   foodOptions.value = await getDictFunc('food')
   teaOptions.value = await getDictFunc('tea')
   Pay_byOptions.value = await getDictFunc('pay_by')
+  otherOptions.value = await getDictFunc('other')
 }
 const setOptions = async(data) => {
   departmentOptions.value = await getDictFunc(data)
@@ -315,6 +322,9 @@ const updateExpensesFunc = async(row) => {
     if (formData.value.department === 'tea'){
       departmentOptions.value = teaOptions.value
     }
+    if (formData.value.department === 'other'){
+      departmentOptions.value = otherOptions.value
+    }
     dialogFormVisible.value = true
   }
 }
@@ -348,6 +358,9 @@ const getDepartment = (value) => {
   }
   if (value === 'tea'){
     departmentOptions.value = teaOptions.value
+  }
+  if (value === 'other'){
+    departmentOptions.value = otherOptions.value
   }
 }
 // 关闭弹窗
