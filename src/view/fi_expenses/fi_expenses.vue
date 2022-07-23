@@ -54,37 +54,40 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+        <el-table-column align="left" label="支出日期" width="120">
+          <template #default="scope">{{ formatDateTime(scope.row.expnDate) }}</template>
         </el-table-column>
         <el-table-column align="left" label="支出说明" prop="content" width="120" />
-        <el-table-column align="left" label="金额" prop="amount" width="120" />
-        <el-table-column align="left" label="支出部门" prop="department" width="120" >
+        <el-table-column align="left" label="金额" prop="amount"  />
+        <el-table-column align="left" label="支出部门" prop="department"  >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
             <el-tag v-if="scope.row.department === 'other'">其他</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="支出类型" prop="type" width="120" >
+        <el-table-column align="left" label="支出类型" prop="type"  >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
             <el-tag v-if="scope.row.department === 'other'">{{ filterDict(scope.row.type,otherOptions) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="支付方式" prop="payment" width="120" >
+        <el-table-column align="left" label="支付方式" prop="payment"  >
           <template #default="scope">
             <el-tag>
               {{ filterDict(scope.row.payment,Pay_byOptions) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="经办人" prop="executor" width="120" />
-        <el-table-column align="left" label="是否开票" prop="invoice" width="120">
+        <el-table-column align="left" label="经办人" prop="executor"  />
+        <el-table-column align="left" label="是否开票" prop="invoice" >
           <template #default="scope">{{ formatBoolean(scope.row.invoice) }}</template>
         </el-table-column>
         <el-table-column align="left" label="备注" prop="note" show-overflow-tooltip width="120" />
+        <el-table-column align="left" label="创建日期" width="180">
+          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+        </el-table-column>
         <el-table-column align="left" label="按钮组">
           <template #default="scope">
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateExpensesFunc(scope.row)">变更</el-button>
@@ -167,7 +170,7 @@ import {
 } from '@/api/fi_expenses'
 
 // 全量引入格式化工具 请按需保留
-import { formatDate, formatBoolean,filterDict, getDictFunc } from '@/utils/format'
+import { formatDate, formatDateTime, formatBoolean,filterDict, getDictFunc } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 const options = ref([
