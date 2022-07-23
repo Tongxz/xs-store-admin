@@ -9,7 +9,9 @@
           <el-input v-model="searchInfo.category" placeholder="搜索条件" />
         </el-form-item>
         <el-form-item label="收款方式">
-          <el-input v-model="searchInfo.payment" placeholder="搜索条件" />
+          <el-select v-model="searchInfo.payment" placeholder="请选择搜索条件" style="width:100%" clearable>
+            <el-option v-for="(item,key) in pay_byOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="是否开票" prop="invoice">
           <el-select v-model="searchInfo.invoice" clearable placeholder="请选择">
@@ -227,6 +229,9 @@ const onSubmit = () => {
   pageSize.value = 10
   if (searchInfo.value.invoice === '') {
     searchInfo.value.invoice = null
+  }
+  if (searchInfo.value.payment === '') {
+    searchInfo.value.payment = null
   }
   getTableData()
 }
