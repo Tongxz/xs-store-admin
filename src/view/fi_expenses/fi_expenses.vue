@@ -109,6 +109,9 @@
         <el-form-item label="支出说明:">
           <el-input v-model="formData.content" clearable placeholder="请输入" />
         </el-form-item>
+        <el-form-item label="支出日期:">
+          <el-date-picker  v-model="formData.expnDate" :disabled-date="disabledDate" type="date" style="width:100%" placeholder="选择日期" clearable />
+        </el-form-item>
         <el-form-item label="金额:">
           <el-input-number v-model="formData.amount" style="width:100%" :precision="2" clearable />
         </el-form-item>
@@ -191,6 +194,7 @@ const formData = ref({
   type: 0,
   payment: '',
   department: '',
+  expnDate: '',
   executor: '',
   invoice: false,
   note: '',
@@ -217,7 +221,9 @@ const onSubmit = () => {
   }
   getTableData()
 }
-
+const disabledDate = (time) => {
+  return time.getTime() > Date.now()
+}
 // 分页
 const handleSizeChange = (val) => {
   pageSize.value = val
@@ -372,6 +378,7 @@ const closeDialog = () => {
     type: 0,
     payment: '',
     department: '',
+    expnDate: '',
     executor: '',
     invoice: false,
     note: '',
