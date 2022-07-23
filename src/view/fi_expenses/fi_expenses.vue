@@ -70,7 +70,7 @@
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
-            <el-tag v-if="scope.row.department === 'other'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
+            <el-tag v-if="scope.row.department === 'other'">{{ filterDict(scope.row.type,otherOptions) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="支付方式" prop="payment" width="120" >
@@ -84,7 +84,7 @@
         <el-table-column align="left" label="是否开票" prop="invoice" width="120">
           <template #default="scope">{{ formatBoolean(scope.row.invoice) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="备注" prop="note" width="120" />
+        <el-table-column align="left" label="备注" prop="note" show-overflow-tooltip width="120" />
         <el-table-column align="left" label="按钮组">
           <template #default="scope">
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateExpensesFunc(scope.row)">变更</el-button>
