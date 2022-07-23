@@ -63,7 +63,7 @@
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
-            <el-tag v-if="scope.row.department === 'other'">茶艺部</el-tag>
+            <el-tag v-if="scope.row.department === 'other'">其他</el-tag>
           </template>
         </el-table-column>
         <el-table-column align="left" label="支出类型" prop="type" width="120" >
