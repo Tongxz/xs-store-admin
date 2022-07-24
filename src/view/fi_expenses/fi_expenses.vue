@@ -6,7 +6,9 @@
           <el-input v-model="searchInfo.type" placeholder="搜索条件" />
         </el-form-item>
         <el-form-item label="支付方式">
-          <el-input v-model="searchInfo.payment" placeholder="搜索条件" />
+          <el-select v-model="searchInfo.payment" placeholder="请选择搜索条件" style="width:100%" clearable>
+            <el-option v-for="(item,key) in Pay_byOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="经办人">
           <el-input v-model="searchInfo.executor" placeholder="搜索条件" />
@@ -113,7 +115,8 @@
           <el-input v-model="formData.content" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="支出日期:">
-          <el-date-picker  v-model="formData.expnDate" :disabled-date="disabledDate" type="date" style="width:100%" placeholder="选择日期" clearable />
+          <el-date-picker  v-model="formData.expnDate" :disabled-date="disabledDate" type="date" format="YYYY/MM/DD"
+            value-format="YYYY-MM-DD" style="width:100%" placeholder="选择日期" clearable />
         </el-form-item>
         <el-form-item label="金额:">
           <el-input-number v-model="formData.amount" style="width:100%" :precision="2" clearable />
@@ -221,6 +224,9 @@ const onSubmit = () => {
   pageSize.value = 10
   if (searchInfo.value.invoice === '') {
     searchInfo.value.invoice = null
+  }
+  if (searchInfo.value.payment === '') {
+    searchInfo.value.payment = null
   }
   getTableData()
 }
