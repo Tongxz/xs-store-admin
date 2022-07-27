@@ -86,7 +86,10 @@
       <el-form :model="formData" label-position="right" label-width="80px">
         <el-form-item label="物品名称:">
           <el-select v-model="formData.name" @change="getWarehousingInfo">
-            <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.ID"></el-option>
+            <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.ID">
+              <span style="float: left">{{ item.name }}</span>
+              <span style="float: right;color: var(--el-text-color-secondary);font-size: 13px;">{{ item.margin }}</span>
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="所属部门:">
@@ -210,7 +213,6 @@ const getTableData = async() => {
   const table = await getOutStockList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   const Warehousing = await getWarehousingName()
   if (Warehousing.code === 0){
-    console.log(Warehousing)
     WarehousingName.value = Warehousing.data.rewarehousing
     console.log(WarehousingName)
   }
