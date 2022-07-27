@@ -71,6 +71,7 @@
         </el-table-column>
         <el-table-column align="left" label="入库数量" prop="quantity" width="120" />
           <el-table-column align="left" label="库存余量" prop="margin" width="120"/>
+        <el-table-column align="left" label="成本价" prop="cost" width="120" />
         <el-table-column align="left" label="单价" prop="unitPrice" width="120" />
         <el-table-column align="left" label="总金额" prop="amount" width="120" />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
@@ -130,6 +131,9 @@
         <el-form-item label="单位:">
           <el-input v-model="formData.unit" clearable placeholder="请输入" />
         </el-form-item>
+        <el-form-item label="成本价:">
+          <el-input-number v-model="formData.cost"  style="width:100%" :precision="2" clearable />
+        </el-form-item>
         <el-form-item label="单价:">
           <el-input-number @change="setAmount" v-model="formData.unitPrice"  style="width:100%" :precision="2" clearable />
         </el-form-item>
@@ -172,6 +176,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import CustomPic from '@/components/customPic/index.vue'
 import { ref } from 'vue'
 import {upLoad} from "@/api/upload";
+import ImageCompress from "@/utils/image";
 
 // 自动化生成的字典（可能为空）以及字段
 const options = ref([
@@ -196,6 +201,7 @@ const formData = ref({
         quantity: 0,
         unit: '',
         unitPrice: 0,
+        cost: 0,
         amount: 0,
         margin: 0,
         remarks: '',
@@ -377,6 +383,7 @@ const closeDialog = () => {
       quantity: 0,
       unit: '',
       unitPrice: 0,
+      cost: 0,
       amount: 0,
       margin: 0,
       remarks: '',
@@ -424,15 +431,17 @@ const wareUpload  = (files) =>  {
 }
 const beforeAvatarUpload= (file) =>  {
   const isJPG = file.type === 'image/jpeg';
-  const isLt2M = file.size / 1024 / 1024 < 10;
-
   if (!isJPG) {
-    this.$message.error('上传头像图片只能是 JPG 格式!');
+    ElMessage.error('上传头像图片只能是 JPG 格式!');
+    return false
   }
-  if (!isLt2M) {
-    this.$message.error('上传头像图片大小不能超过 2MB!');
+  const isRightSize = file.size / 1024 < 10*1024
+  if (!isRightSize) {
+    // 压缩
+    const compress = new ImageCompress(file, 10*1024, 1920)
+    return compress.compress()
   }
-  return isJPG && isLt2M;
+  return isRightSize && isJPG;
 }
 </script>
 <style scoped>
