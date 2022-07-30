@@ -3,7 +3,7 @@
  */
 
 const config = {
-  appName: '香石管理系统',
+  appName: '香石门店管理系统',
   appLogo: 'https://xs-qingshi.oss-cn-shanghai.aliyuncs.com/oss%3A//xs-qingshi//uploads/2022-06-30/IMG_4313.JPG',
   showViteLogo: true
 }
