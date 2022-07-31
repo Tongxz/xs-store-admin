@@ -64,6 +64,11 @@
             <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column align="left" label="收入分类" prop="income_type" width="120">
+          <template #default="scope" >
+            <el-tag >{{ filterDict(scope.row.income_type,sortOptions) }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="付款方式" prop="payment" width="120">
             <template #default="scope">
               <el-tag>{{ filterDict(scope.row.payment,pay_byOptions) }}</el-tag>
@@ -118,6 +123,11 @@
         <el-form-item label="物品类别:">
           <el-select v-model="formData.type" placeholder="请选择" style="width:100%" clearable>
             <el-option v-for="(item,key) in departmentOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="收入分类:">
+          <el-select v-model="formData.income_type" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in sortOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="付款方式:">
@@ -191,12 +201,14 @@ const options = ref([
 const foodOptions = ref([])
 const teaOptions = ref([])
 const pay_byOptions = ref([])
+const sortOptions = ref([])
 const departmentOptions = ref([])
 const formData = ref({
         imgUrl: '',
         name: '',
         department: '',
         type: undefined,
+        income_type: undefined,
         payment: undefined,
         quantity: 0,
         unit: '',
@@ -260,6 +272,7 @@ const setOptions = async () =>{
     foodOptions.value = await getDictFunc('food')
     teaOptions.value = await getDictFunc('tea')
     pay_byOptions.value = await getDictFunc('pay_by')
+  sortOptions.value = await getDictFunc('sort')
 }
 
 // 获取需要的字典 可能为空 按需保留
