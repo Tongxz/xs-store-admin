@@ -1,7 +1,7 @@
 import service from '@/utils/request'
 import { ElMessage } from 'element-plus'
 
-const handleFileError = (res, fileName) => {
+export const handleFileError = (res, fileName) => {
   if (typeof (res.data) !== 'undefined') {
     if (res.data.type === 'application/json') {
       const reader = new FileReader()

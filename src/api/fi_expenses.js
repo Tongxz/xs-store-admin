@@ -1,4 +1,5 @@
 import service from '@/utils/request'
+import {handleFileError} from "@/api/excel";
 
 // @Tags Expenses
 // @Summary 创建Expenses
@@ -27,7 +28,7 @@ export const createExpenses = (data) => {
 export const deleteExpenses = (data) => {
   return service({
     url: '/expenses/deleteExpenses',
-    method: 'delete',
+    method: 'post',
     data
   })
 }
@@ -43,7 +44,7 @@ export const deleteExpenses = (data) => {
 export const deleteExpensesByIds = (data) => {
   return service({
     url: '/expenses/deleteExpensesByIds',
-    method: 'delete',
+    method: 'post',
     data
   })
 }
@@ -93,5 +94,18 @@ export const getExpensesList = (params) => {
     url: '/expenses/getExpensesList',
     method: 'get',
     params
+  })
+}
+export const getExpensesExcel = (tableData, fileName) => {
+  service({
+    url: '/expenses/getExpensesListExcel',
+    method: 'post',
+    data: {
+      fileName: fileName,
+      infoList: tableData
+    },
+    responseType: 'blob'
+  }).then((res) => {
+    handleFileError(res, fileName)
   })
 }

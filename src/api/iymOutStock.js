@@ -27,7 +27,7 @@ export const createOutStock = (data) => {
 export const deleteOutStock = (data) => {
   return service({
     url: '/stock/deleteOutStock',
-    method: 'delete',
+    method: 'post',
     data
   })
 }
@@ -43,7 +43,7 @@ export const deleteOutStock = (data) => {
 export const deleteOutStockByIds = (data) => {
   return service({
     url: '/stock/deleteOutStockByIds',
-    method: 'delete',
+    method: 'post',
     data
   })
 }

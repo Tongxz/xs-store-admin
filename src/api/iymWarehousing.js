@@ -1,4 +1,6 @@
 import service from '@/utils/request'
+import {handleFileError} from '@/api/excel'
+import {ElMessage} from "element-plus";
 
 // @Tags Warehousing
 // @Summary 创建Warehousing
@@ -27,7 +29,7 @@ export const createWarehousing = (data) => {
 export const deleteWarehousing = (data) => {
   return service({
     url: '/warehousing/deleteWarehousing',
-    method: 'delete',
+    method: 'post',
     data
   })
 }
@@ -43,7 +45,7 @@ export const deleteWarehousing = (data) => {
 export const deleteWarehousingByIds = (data) => {
   return service({
     url: '/warehousing/deleteWarehousingByIds',
-    method: 'delete',
+    method: 'post',
     data
   })
 }
@@ -100,5 +102,20 @@ export const getWarehousingName = (params) => {
     url: '/warehousing/getWarehousingName',
     method: 'get',
     params
+  })
+}
+
+
+export const getWarehousingExcel = (tableData, fileName) => {
+  service({
+    url: '/warehousing/getWarehousingExcel',
+    method: 'post',
+    data: {
+      fileName: fileName,
+      infoList: tableData
+    },
+    responseType: 'blob'
+  }).then((res) => {
+    handleFileError(res, fileName)
   })
 }
