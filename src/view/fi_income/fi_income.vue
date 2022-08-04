@@ -139,15 +139,15 @@
             <el-table-column align="left" prop="incomeType" label="类型" width="180">
               <template #default="scope">
                 <el-select v-model="scope.row.type" @change="getSort" placeholder="请选择" style="width:100%" clearable>
-                  <el-option v-for="(item,key) in sortOptions" :key="key" :label="item.label" :value="item.value" />
+                  <el-option v-for="(item,key) in sortOptions" :key="key" :label="item.label" :value="item.label" />
                 </el-select>
               </template>
             </el-table-column>
             <el-table-column align="left" prop="sold" label="物品" width="180">
               <template #default="scope">
                 <div>
-                  <el-select v-model="scope.row.sold" @change="getWarehousingInfo">
-                    <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.ID">
+                  <el-select v-model="scope.row.sold" filterable allow-create @change="getWarehousingInfo">
+                    <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.label">
                       <span style="float: left">{{ item.name }}</span>
                       <span style="float: right;color: var(--el-text-color-secondary);font-size: 13px;">{{ item.margin +"/"+ item.unit }}</span>
                     </el-option>
@@ -365,8 +365,6 @@ const getWarehousingInfo = async (value) => {
       }
     })
   }
-  console.log(res.data)
-  console.log(formData)
 }
 const getSort = async (value) => {
   const Warehousing = await getWarehousingName({income_type: value})
@@ -396,7 +394,7 @@ const addParameter = (form) => {
     form.incomeDetails = []
   }
   form.incomeDetails.push({
-    type: 'query',
+    type: '',
     sold: '',
     number: '',
     price: ''
