@@ -23,7 +23,8 @@
     <div class="gva-table-box">
         <div class="gva-btn-list">
             <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
-            <el-popover v-model:visible="deleteVisible" placement="top" width="160">
+          <el-button class="excel-btn" size="small" type="primary" icon="download" @click="handleExcelExport()">导出</el-button>
+          <el-popover v-model:visible="deleteVisible" placement="top" width="160">
             <p>确定要删除吗？</p>
             <div style="text-align: right; margin-top: 8px;">
                 <el-button size="small" type="text" @click="deleteVisible = false">取消</el-button>
@@ -177,7 +178,7 @@ import {
   deleteWarehousingByIds,
   updateWarehousing,
   findWarehousing,
-  getWarehousingList, getWarehousingName
+  getWarehousingList, getWarehousingName, getWarehousingExcel
 } from '@/api/iymWarehousing'
 
 // 全量引入格式化工具 请按需保留
@@ -187,6 +188,7 @@ import CustomPic from '@/components/customPic/index.vue'
 import { ref } from 'vue'
 import {upLoad} from "@/api/upload";
 import ImageCompress from "@/utils/image";
+import {exportExcel} from "@/api/excel";
 
 // 自动化生成的字典（可能为空）以及字段
 const options = ref([
@@ -203,6 +205,7 @@ const teaOptions = ref([])
 const pay_byOptions = ref([])
 const sortOptions = ref([])
 const departmentOptions = ref([])
+const time = ref()
 const formData = ref({
         imgUrl: '',
         name: '',
@@ -297,6 +300,25 @@ const handleSelectionChange = (val) => {
     multipleSelection.value = val
 }
 
+const handleExcelExport = (fileName) => {
+  time.value = getTime()
+  if (!fileName || typeof fileName !== 'string') {
+    fileName = '入库列表'+ time.value +'.xlsx'
+  }
+  console.log(time.value)
+  getWarehousingExcel(tableData.value, fileName)
+}
+const getTime = () => {
+  // 获取当前时间并打印
+  let time = '';
+  let yy = new Date().getFullYear()
+  let mm = new Date().getMonth() + 1
+  let dd = new Date().getDate()
+  let hh = new Date().getHours()
+  let mf = new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes()
+  time = yy + '_' + mm + '_' + dd + '_' + hh + ':' + mf
+  return time
+}
 // 删除行
 const deleteRow = (row) => {
     ElMessageBox.confirm('确定要删除吗?', '提示', {
