@@ -75,6 +75,8 @@
         </el-table-column>
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
+            <el-button type="text" icon="edit" size="small" class="table-button" @click="openRechargeDialog(scope.row)">充值</el-button>
+            <el-button type="text" icon="edit" size="small" class="table-button" @click="gotoMemberFunc(scope.row)">消费记录</el-button>
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateMemberFunc(scope.row)">变更</el-button>
             <el-button type="text" icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
             </template>
@@ -105,13 +107,13 @@
             <el-option v-for="(item,key) in genderOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="是否会员:">
+        <el-form-item label="是否会员:" v-if="type !== 'update'">
           <el-switch v-model="formData.memberCard" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
         </el-form-item>
-        <el-form-item label="会员卡余额:" v-if="formData.memberCard">
+        <el-form-item label="会员卡余额:" v-if="formData.memberCard && type !=='update'">
           <el-input-number v-model="formData.memberBalance"  style="width:100%" :precision="2" clearable />
         </el-form-item>
-        <el-form-item label="开通时间:" v-if="formData.memberCard">
+        <el-form-item label="开通时间:" v-if="formData.memberCard && type !=='update'">
           <el-date-picker  v-model="formData.openDate" type="date" style="width:100%" placeholder="选择日期" clearable />
         </el-form-item>
         <el-form-item label="喜好:">
@@ -125,6 +127,19 @@
         <div class="dialog-footer">
           <el-button size="small" @click="closeDialog">取 消</el-button>
           <el-button size="small" type="primary" @click="enterDialog">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="rechargeDialogFormVisible" :before-close="closeRechargeDialog" title="弹窗操作">
+      <el-form :model="rechargeFormData" label-position="right" label-width="80px">
+        <el-form-item label="充值金额:">
+          <el-input-number v-model="rechargeFormData.amount"  style="width:100%" :precision="2" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeRechargeDialog">取 消</el-button>
+          <el-button size="small" type="primary" @click="enterRechargeDialog">确 定</el-button>
         </div>
       </template>
     </el-dialog>
@@ -146,11 +161,13 @@ import {
   findMember,
   getMemberList
 } from '@/api/umsMember'
-
+const router = useRouter()
 // 全量引入格式化工具 请按需保留
 import {formatDateTime, getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
+import {useRouter} from "vue-router";
+import {createRecharge} from "@/api/umsRecharge";
 
 // 自动化生成的字典（可能为空）以及字段
 const genderOptions = ref([])
@@ -163,6 +180,11 @@ const formData = ref({
         memberCard: false,
         memberBalance: 0,
         openDate: new Date(),
+        })
+const rechargeFormData = ref({
+        memberId: 0,
+        amount: 0,
+        sign: true,
         })
 
 // =========== 表格控制部分 ===========
@@ -285,6 +307,15 @@ const updateMemberFunc = async(row) => {
         dialogFormVisible.value = true
     }
 }
+// 消费记录
+const gotoMemberFunc = async(row) => {
+  router.push({
+    name: 'recharge',
+    params: {
+      id: row.ID,
+    },
+  })
+}
 
 
 // 删除行
@@ -304,11 +335,17 @@ const deleteMemberFunc = async (row) => {
 
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
+const rechargeDialogFormVisible = ref(false)
 
 // 打开弹窗
 const openDialog = () => {
     type.value = 'create'
     dialogFormVisible.value = true
+}// 打开弹窗
+const openRechargeDialog = (row) => {
+    type.value = 'create'
+    rechargeFormData.value.memberId = row.ID
+    rechargeDialogFormVisible.value = true
 }
 
 // 关闭弹窗
@@ -323,6 +360,15 @@ const closeDialog = () => {
         memberCard: false,
         memberBalance: 0,
         openDate: new Date(),
+        }
+}
+// 关闭弹窗
+const closeRechargeDialog = () => {
+    rechargeDialogFormVisible.value = false
+    rechargeFormData.value = {
+          memberId: 0,
+          amount: 0,
+          sign: true,
         }
 }
 // 弹窗确定
@@ -345,6 +391,19 @@ const enterDialog = async () => {
           message: '创建/更改成功'
         })
         closeDialog()
+        getTableData()
+      }
+}
+// 弹窗确定
+const enterRechargeDialog = async () => {
+      let res
+      res = await createRecharge(rechargeFormData.value)
+      if (res.code === 0) {
+        ElMessage({
+          type: 'success',
+          message: '创建/更改成功'
+        })
+        closeRechargeDialog()
         getTableData()
       }
 }
