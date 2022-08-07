@@ -98,7 +98,7 @@ export const getExpensesList = (params) => {
 }
 export const getExpensesExcel = (tableData, fileName) => {
   service({
-    url: '/expenses/getExpensesListExcel',
+    url: '/expenses/getExpensesExcel',
     method: 'post',
     data: {
       fileName: fileName,

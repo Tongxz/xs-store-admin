@@ -36,6 +36,7 @@
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
+        <el-button class="excel-btn" size="small" type="primary" icon="download" @click="handleExcelExport()">导出</el-button>
         <el-popover v-model:visible="deleteVisible" placement="top" width="160">
           <p>确定要删除吗？</p>
           <div style="text-align: right; margin-top: 8px;">
@@ -169,13 +170,14 @@ import {
   deleteExpensesByIds,
   updateExpenses,
   findExpenses,
-  getExpensesList
+  getExpensesList, getExpensesExcel
 } from '@/api/fi_expenses'
 
 // 全量引入格式化工具 请按需保留
 import { formatDate, formatDateTime, formatBoolean,filterDict, getDictFunc } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
+import {getWarehousingExcel} from "@/api/iymWarehousing";
 const options = ref([
   {
     name: '餐饮部',
@@ -415,6 +417,12 @@ const enterDialog = async() => {
     closeDialog()
     getTableData()
   }
+}
+const handleExcelExport = (fileName) => {
+  if (!fileName || typeof fileName !== 'string') {
+    fileName = '支出列表.xlsx'
+  }
+  getExpensesExcel(searchInfo.value, fileName)
 }
 </script>
 
