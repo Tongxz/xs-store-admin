@@ -147,7 +147,7 @@
               <template #default="scope">
                 <div>
                   <el-select v-model="scope.row.sold" filterable allow-create @change="getWarehousingInfo">
-                    <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.label">
+                    <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.name">
                       <span style="float: left">{{ item.name }}</span>
                       <span style="float: right;color: var(--el-text-color-secondary);font-size: 13px;">{{ item.margin +"/"+ item.unit }}</span>
                     </el-option>
@@ -243,6 +243,7 @@ import {formatDateTime, formatBoolean, getDictFunc, filterDict} from '@/utils/fo
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 import {findWarehousing, getWarehousingName} from "@/api/iymWarehousing";
+import {findMember, getMemberName} from "@/api/umsMember";
 
 // 自动化生成的字典（可能为空）以及字段
 const product_typeOptions = ref([])
@@ -252,6 +253,7 @@ const pay_byOptions = ref([])
 const departmentOptions = ref([])
 const sortOptions = ref([])
 const WarehousingName = ref([])
+const memberName = ref([])
 const formData = ref({
   name: '',
   mobile: undefined,
@@ -366,6 +368,13 @@ const getWarehousingInfo = async (value) => {
     })
   }
 }
+const getMemberInfo = async (value) => {
+  console.log(value)
+  const res = await findMember({ID: value})
+  if (res.code === 0) {
+    formData.value.mobile = res.data.remember.mobile
+  }
+}
 const getSort = async (value) => {
   const Warehousing = await getWarehousingName({income_type: value})
   if (Warehousing.code === 0){
@@ -373,7 +382,14 @@ const getSort = async (value) => {
     console.log(WarehousingName)
   }
 }
+const getMember = async () => {
+  const member = await getMemberName()
+  if (member.code === 0){
+    console.log(member)
+    memberName.value = member.data.remembers
+  }
 
+}
 // 删除行
 const deleteRow = (row) => {
   ElMessageBox.confirm('确定要删除吗?', '提示', {
