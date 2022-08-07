@@ -31,6 +31,7 @@
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
+        <el-button class="excel-btn" size="small" type="primary" icon="download" @click="handleExcelExport()">导出</el-button>
         <el-popover v-model:visible="deleteVisible" placement="top" width="160">
           <p>确定要删除吗？</p>
           <div style="text-align: right; margin-top: 8px;">
@@ -235,7 +236,7 @@ import {
   deleteIncomeByIds,
   updateIncome,
   findIncome,
-  getIncomeList
+  getIncomeList, getIncomeExcel
 } from '@/api/fi_income'
 
 // 全量引入格式化工具 请按需保留
@@ -244,6 +245,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 import {findWarehousing, getWarehousingName} from "@/api/iymWarehousing";
 import {findMember, getMemberName} from "@/api/umsMember";
+import {getExpensesExcel} from "@/api/fi_expenses";
 
 // 自动化生成的字典（可能为空）以及字段
 const product_typeOptions = ref([])
@@ -533,6 +535,12 @@ const enterDialog = async() => {
     closeDialog()
     getTableData()
   }
+}
+const handleExcelExport = (fileName) => {
+  if (!fileName || typeof fileName !== 'string') {
+    fileName = '收入列表.xlsx'
+  }
+  getIncomeExcel(searchInfo.value, fileName)
 }
 </script>
 

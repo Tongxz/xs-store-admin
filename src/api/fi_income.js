@@ -96,9 +96,9 @@ export const getIncomeList = (params) => {
     params
   })
 }
-export const getWarehousingExcel = (tableData, fileName) => {
+export const getIncomeExcel = (tableData, fileName) => {
   service({
-    url: '/warehousing/getWarehousingExcel',
+    url: '/income/getIncomeExcel',
     method: 'post',
     data: {
       fileName: fileName,
