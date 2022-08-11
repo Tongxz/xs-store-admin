@@ -65,6 +65,21 @@ export const updateWarehousing = (data) => {
     data
   })
 }
+// @Tags Warehousing
+// @Summary 更新Warehousing
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.Warehousing true "更新Warehousing"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
+// @Router /warehousing/updateWarehousing [put]
+export const updateWarehousingMargin = (data) => {
+  return service({
+    url: '/warehousing/updateWarehousingMargin',
+    method: 'put',
+    data
+  })
+}
 
 // @Tags Warehousing
 // @Summary 用id查询Warehousing

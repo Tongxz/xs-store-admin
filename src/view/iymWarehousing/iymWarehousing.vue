@@ -83,6 +83,7 @@
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
+            <el-button type="text" icon="edit" size="small" class="table-button" @click="openMarginDialog(scope.row)">增加库存</el-button>
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateWarehousingFunc(scope.row)">变更</el-button>
             <el-button type="text" icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
             </template>
@@ -162,6 +163,19 @@
         </div>
       </template>
     </el-dialog>
+    <el-dialog v-model="dialogMarginFormVisible" :before-close="closeMarginDialog" title="弹窗操作">
+      <el-form :model="formMarginData" label-position="right" label-width="80px">
+        <el-form-item label="数量:">
+          <el-input v-model.number="formMarginData.margin" clearable placeholder="请输入" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeMarginDialog">取 消</el-button>
+          <el-button size="small" type="primary" @click="enterMarginDialog">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -178,7 +192,7 @@ import {
   deleteWarehousingByIds,
   updateWarehousing,
   findWarehousing,
-  getWarehousingList, getWarehousingName, getWarehousingExcel
+  getWarehousingList, getWarehousingName, getWarehousingExcel, updateWarehousingMargin
 } from '@/api/iymWarehousing'
 
 // 全量引入格式化工具 请按需保留
@@ -189,6 +203,7 @@ import { ref } from 'vue'
 import {upLoad} from "@/api/upload";
 import ImageCompress from "@/utils/image";
 import {exportExcel} from "@/api/excel";
+import {createRecharge} from "@/api/umsRecharge";
 
 // 自动化生成的字典（可能为空）以及字段
 const options = ref([
@@ -220,6 +235,10 @@ const formData = ref({
         amount: 0,
         margin: 0,
         remarks: '',
+        })
+const formMarginData = ref({
+        id: 0,
+        margin: 0
         })
 
 // =========== 表格控制部分 ===========
@@ -399,11 +418,17 @@ const deleteWarehousingFunc = async (row) => {
 
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
+const dialogMarginFormVisible = ref(false)
 
 // 打开弹窗
 const openDialog = () => {
     type.value = 'create'
     dialogFormVisible.value = true
+}// 打开弹窗
+const openMarginDialog = (row) => {
+    type.value = 'create'
+  formMarginData.value.id = row.ID
+  dialogMarginFormVisible.value = true
 }
 
 // 关闭弹窗
@@ -424,6 +449,14 @@ const closeDialog = () => {
       remarks: '',
         }
 }
+// 关闭弹窗
+const closeMarginDialog = () => {
+    dialogMarginFormVisible.value = false
+    formMarginData.value = {
+      id: 0,
+      margin: 0,
+    }
+}
 // 弹窗确定
 const enterDialog = async () => {
       let res
@@ -440,6 +473,27 @@ const enterDialog = async () => {
           res = await createWarehousing(formData.value)
           break
       }
+      if (res.code === 0) {
+        ElMessage({
+          type: 'success',
+          message: '创建/更改成功'
+        })
+        closeDialog()
+        getTableData()
+      }
+}
+// 弹窗确定
+const enterMarginDialog = async () => {
+  let res
+  res = await updateWarehousingMargin(formMarginData.value)
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '创建/更改成功'
+    })
+    closeMarginDialog()
+    getTableData()
+  }
       if (res.code === 0) {
         ElMessage({
           type: 'success',
