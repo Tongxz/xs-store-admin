@@ -53,39 +53,40 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="入库名称" prop="name" width="120" />
-        <el-table-column align="left" label="所属部门" prop="department" width="120" >
+        <el-table-column align="left" label="所属部门" prop="department"  >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="物品类别" prop="type" width="120">
+        <el-table-column align="left" label="物品类别" prop="type" >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="收入分类" prop="income_type" width="120">
+        <el-table-column align="left" label="收入分类" prop="income_type" >
           <template #default="scope" >
             <el-tag >{{ filterDict(scope.row.income_type,sortOptions) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="付款方式" prop="payment" width="120">
+        <el-table-column align="left" label="付款方式" prop="payment" >
             <template #default="scope">
               <el-tag>{{ filterDict(scope.row.payment,pay_byOptions) }}</el-tag>
             </template>
         </el-table-column>
-        <el-table-column align="left" label="入库数量" prop="quantity" width="120" />
-          <el-table-column align="left" label="库存余量" prop="margin" width="120"/>
-        <el-table-column align="left" label="成本价" prop="cost" width="120" />
-        <el-table-column align="left" label="单价" prop="unitPrice" width="120" />
-        <el-table-column align="left" label="总金额" prop="amount" width="120" />
+        <el-table-column align="left" label="入库数量" prop="quantity"  />
+          <el-table-column align="left" label="库存余量" prop="margin" />
+        <el-table-column align="left" label="成本价" prop="cost"  />
+        <el-table-column align="left" label="单价" prop="unitPrice" />
+        <el-table-column align="left" label="总金额" prop="amount"  />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
             <el-button type="text" icon="edit" size="small" class="table-button" @click="openMarginDialog(scope.row)">增加库存</el-button>
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateWarehousingFunc(scope.row)">变更</el-button>
             <el-button type="text" icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
+<!--              v-auth="btnAuth.update"-->
             </template>
         </el-table-column>
         </el-table>
@@ -204,7 +205,8 @@ import {upLoad} from "@/api/upload";
 import ImageCompress from "@/utils/image";
 import {exportExcel} from "@/api/excel";
 import {createRecharge} from "@/api/umsRecharge";
-
+import { useBtnAuth } from '@/utils/btnAuth'
+const btnAuth = useBtnAuth()
 // 自动化生成的字典（可能为空）以及字段
 const options = ref([
   {
