@@ -2,6 +2,9 @@
   <div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
+        <el-form-item label="姓名">
+          <el-input v-model="searchInfo.name" placeholder="搜索条件" />
+        </el-form-item>
         <el-form-item label="手机号码">
           <el-input v-model="searchInfo.mobile" placeholder="搜索条件" />
         </el-form-item>
