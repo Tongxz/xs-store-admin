@@ -7,9 +7,25 @@
         </el-form-item>
         <el-form-item label="类别">
           <el-input v-model="searchInfo.category" placeholder="搜索条件" />
+          <el-select v-model="searchInfo.category" placeholder="Select">
+            <el-option-group
+                v-for="group in foodOptions"
+                :key="group.label"
+                :label="group.label"
+            >
+              <el-option
+                  v-for="item in teaOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+              />
+            </el-option-group>
+          </el-select>
         </el-form-item>
         <el-form-item label="收款方式">
-          <el-input v-model="searchInfo.payment" placeholder="搜索条件" />
+          <el-select v-model="searchInfo.payment" placeholder="请选择搜索条件" style="width:100%" clearable>
+            <el-option v-for="(item,key) in pay_byOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="是否开票" prop="invoice">
           <el-select v-model="searchInfo.invoice" clearable placeholder="请选择">
@@ -29,6 +45,7 @@
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
+        <el-button class="excel-btn" size="small" type="primary" icon="download" @click="handleExcelExport()">导出</el-button>
         <el-popover v-model:visible="deleteVisible" placement="top" width="160">
           <p>确定要删除吗？</p>
           <div style="text-align: right; margin-top: 8px;">
@@ -56,7 +73,7 @@
       >
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="日期" width="180">
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+          <template #default="scope">{{ formatDateTime(scope.row.incomeData) }}</template>
         </el-table-column>
         <el-table-column align="left" label="客户名称" prop="name" width="120" />
         <el-table-column align="left" label="手机号码" prop="mobile" width="120" />
@@ -126,6 +143,61 @@
             <el-option v-for="(item,key) in departmentOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
+        <div>
+          <el-button
+              size="small"
+              type="primary"
+              icon="edit"
+              @click="addParameter(formData)"
+          >新增收入明细</el-button>
+          <el-table :data="formData.incomeDetails" style="width: 100%">
+            <el-table-column align="left" prop="incomeType" label="类型" width="180">
+              <template #default="scope">
+                <el-select v-model="scope.row.type" @change="getSort" placeholder="请选择" style="width:100%" clearable>
+                  <el-option v-for="(item,key) in sortOptions" :key="key" :label="item.label" :value="item.value" />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column align="left" prop="sold" label="物品" width="180">
+              <template #default="scope">
+                <div>
+                  <el-select v-model="scope.row.sold" filterable allow-create @change="getWarehousingInfo">
+                    <el-option v-for="(item,key) in WarehousingName" :key="key" :label="item.name" :value="item.ID">
+                      <span style="float: left">{{ item.name }}</span>
+                      <span style="float: right;color: var(--el-text-color-secondary);font-size: 13px;">{{ item.margin +"/"+ item.unit }}</span>
+                    </el-option>
+                  </el-select>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="left" prop="number" label="数量">
+              <template #default="scope">
+                <div>
+                  <el-input-number v-model="scope.row.number" />
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="left" prop="price" label="金额">
+              <template #default="scope">
+                <div>
+                  <el-input-number v-model="scope.row.price" />
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="left">
+              <template #default="scope">
+                <div>
+                  <el-button
+                      type="danger"
+                      size="small"
+                      icon="delete"
+                      @click="deleteParameter(formData.incomeDetails,scope.$index)"
+                  >删除</el-button>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
         <el-form-item label="收款方式:">
           <el-select v-model="formData.payment" placeholder="请选择" style="width:100%" clearable>
             <el-option v-for="(item,key) in pay_byOptions" :key="key" :label="item.label" :value="item.value" />
@@ -141,19 +213,15 @@
             clearable
           />
         </el-form-item>
+        <el-form-item label="发票号:" v-if="formData.invoice" >
+          <el-input v-model="formData.bill" clearable placeholder="请输入" />
+        </el-form-item>
         <el-form-item label="负责人:">
           <el-input v-model="formData.waiter" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="收入日期:">
-          <el-date-picker
-              v-model="formData.incomeData"
-              type="date"
-              :placeholder="'请选择时间'"
-              :disabled-date="disabledDate"
-              size="small"
-              format="YYYY/MM/DD"
-              value-format="YYYY-MM-DD"
-          />
+          <el-date-picker  v-model="formData.incomeData" :disabled-date="disabledDate" type="date" style="width:100%" format="YYYY/MM/DD"
+                           value-format="YYYY-MM-DD" placeholder="选择日期" clearable />
         </el-form-item>
         <el-form-item label="备注:">
           <el-input v-model="formData.note" clearable placeholder="请输入" />
@@ -182,13 +250,16 @@ import {
   deleteIncomeByIds,
   updateIncome,
   findIncome,
-  getIncomeList
+  getIncomeList, getIncomeExcel
 } from '@/api/fi_income'
 
 // 全量引入格式化工具 请按需保留
-import {formatDate, formatBoolean, getDictFunc, filterDict} from '@/utils/format'
+import {formatDateTime, formatBoolean, getDictFunc, filterDict} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
+import {findWarehousing, getWarehousingName} from "@/api/iymWarehousing";
+import {findMember, getMemberName} from "@/api/umsMember";
+import {getExpensesExcel} from "@/api/fi_expenses";
 
 // 自动化生成的字典（可能为空）以及字段
 const product_typeOptions = ref([])
@@ -196,6 +267,9 @@ const foodOptions = ref([])
 const teaOptions = ref([])
 const pay_byOptions = ref([])
 const departmentOptions = ref([])
+const sortOptions = ref([])
+const WarehousingName = ref([])
+const memberName = ref([])
 const formData = ref({
   name: '',
   mobile: undefined,
@@ -205,7 +279,9 @@ const formData = ref({
   category: '',
   incomeData: '',
   payment: '',
+  bill: '',
   note: '',
+  incomeDetails: []
 })
 const options = ref([
   {
@@ -235,6 +311,9 @@ const onSubmit = () => {
   pageSize.value = 10
   if (searchInfo.value.invoice === '') {
     searchInfo.value.invoice = null
+  }
+  if (searchInfo.value.payment === '') {
+    searchInfo.value.payment = null
   }
   getTableData()
 }
@@ -273,6 +352,7 @@ const setOptions = async () =>{
   foodOptions.value = await getDictFunc('food')
   teaOptions.value = await getDictFunc('tea')
   pay_byOptions.value = await getDictFunc('pay_by')
+  sortOptions.value = await getDictFunc('sort')
 }// 获取需要的字典 可能为空 按需保留
 
 // 获取需要的字典 可能为空 按需保留
@@ -292,6 +372,54 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
 }
 
+const getWarehousingInfo = async (value) => {
+  if (value) {
+    const res = await findWarehousing ({ID: value})
+    if (res.code === 0) {
+      console.log(res.data.rewarehousing)
+      formData.value.incomeDetails.forEach((item)=> {
+        if (item.sold === res.data.rewarehousing.ID ){
+          item.price = res.data.rewarehousing.unitPrice
+        }
+      })
+    }
+  }
+}
+const getWarehousing = async (value) => {
+  console.log(value)
+  const res = await findWarehousing ({ID: value})
+  if (res.code === 0) {
+    console.log(res.data.rewarehousing)
+    formData.value.incomeDetails.forEach((item)=> {
+      if (item.sold === res.data.rewarehousing.ID ){
+        item.price = res.data.rewarehousing.unitPrice
+      }
+    })
+  }
+}
+const getMemberInfo = async (value) => {
+  console.log(value)
+  const res = await findMember({ID: value})
+  if (res.code === 0) {
+    formData.value.mobile = res.data.remember.mobile
+  }
+}
+const getSort = async (value) => {
+  console.log(value)
+  const Warehousing = await getWarehousingName({income_type: value})
+  if (Warehousing.code === 0){
+    WarehousingName.value = Warehousing.data.rewarehousing
+    console.log(WarehousingName)
+  }
+}
+const getMember = async () => {
+  const member = await getMemberName()
+  if (member.code === 0){
+    console.log(member)
+    memberName.value = member.data.remembers
+  }
+
+}
 // 删除行
 const deleteRow = (row) => {
   ElMessageBox.confirm('确定要删除吗?', '提示', {
@@ -305,6 +433,24 @@ const deleteRow = (row) => {
 
 // 批量删除控制标记
 const deleteVisible = ref(false)
+
+// 新增参数
+const addParameter = (form) => {
+  if (!form.incomeDetails) {
+    form.incomeDetails = []
+  }
+  form.incomeDetails.push({
+    type: '',
+    sold: '',
+    number: '',
+    price: ''
+  })
+}
+
+// 删除参数
+const deleteParameter = (incomeDetails, index) => {
+  incomeDetails.splice(index, 1)
+}
 
 // 多选删除
 const onDelete = async() => {
@@ -383,10 +529,14 @@ const closeDialog = () => {
   dialogFormVisible.value = false
   formData.value = {
     name: '',
-    mobile: 0,
+    mobile: undefined,
     amount: 0,
     invoice: false,
     waiter: '',
+    category: '',
+    incomeData: '',
+    payment: '',
+    bill: '',
     note: '',
   }
 }
@@ -413,6 +563,12 @@ const enterDialog = async() => {
     closeDialog()
     getTableData()
   }
+}
+const handleExcelExport = (fileName) => {
+  if (!fileName || typeof fileName !== 'string') {
+    fileName = '收入列表.xlsx'
+  }
+  getIncomeExcel(searchInfo.value, fileName)
 }
 </script>
 

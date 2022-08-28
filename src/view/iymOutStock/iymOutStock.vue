@@ -103,7 +103,7 @@
           <el-input v-model="formData.unit" disabled placeholder="请输入" />
         </el-form-item>
         <el-form-item label="数量:">
-          <el-input-number v-model="formData.quantity" min="1" clearable placeholder="请输入" />
+          <el-input-number v-model="formData.quantity" placeholder="请输入" />
         </el-form-item>
         <el-form-item label="单价:">
           <el-input-number v-model="formData.unitPrice" disabled  :precision="2" clearable />

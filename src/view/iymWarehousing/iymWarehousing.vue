@@ -23,7 +23,8 @@
     <div class="gva-table-box">
         <div class="gva-btn-list">
             <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
-            <el-popover v-model:visible="deleteVisible" placement="top" width="160">
+          <el-button class="excel-btn" size="small" type="primary" icon="download" @click="handleExcelExport()">导出</el-button>
+          <el-popover v-model:visible="deleteVisible" placement="top" width="160">
             <p>确定要删除吗？</p>
             <div style="text-align: right; margin-top: 8px;">
                 <el-button size="small" type="text" @click="deleteVisible = false">取消</el-button>
@@ -52,32 +53,40 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="入库名称" prop="name" width="120" />
-        <el-table-column align="left" label="所属部门" prop="department" width="120" >
+        <el-table-column align="left" label="所属部门" prop="department"  >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">餐饮部</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">茶艺部</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="物品类别" prop="type" width="120">
+        <el-table-column align="left" label="物品类别" prop="type" width="100" >
           <template #default="scope" >
             <el-tag v-if="scope.row.department === 'food'">{{ filterDict(scope.row.type,foodOptions) }}</el-tag>
             <el-tag v-if="scope.row.department === 'tea'">{{ filterDict(scope.row.type,teaOptions) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="付款方式" prop="payment" width="120">
+        <el-table-column align="left" label="收入分类" prop="income_type" >
+          <template #default="scope" >
+            <el-tag >{{ filterDict(scope.row.income_type,sortOptions) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="付款方式" prop="payment" width="100" >
             <template #default="scope">
               <el-tag>{{ filterDict(scope.row.payment,pay_byOptions) }}</el-tag>
             </template>
         </el-table-column>
-        <el-table-column align="left" label="入库数量" prop="quantity" width="120" />
-          <el-table-column align="left" label="库存余量" prop="margin" width="120"/>
-        <el-table-column align="left" label="单价" prop="unitPrice" width="120" />
-        <el-table-column align="left" label="总金额" prop="amount" width="120" />
+        <el-table-column align="left" label="入库数量" prop="quantity"  />
+          <el-table-column align="left" label="库存余量" prop="margin" />
+        <el-table-column align="left" label="成本价" prop="cost"  />
+        <el-table-column align="left" label="单价" prop="unitPrice" />
+        <el-table-column align="left" label="总金额" prop="amount"  />
         <el-table-column align="left" label="备注" prop="remarks" width="120" />
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
+            <el-button type="text" icon="edit" size="small" class="table-button" @click="openMarginDialog(scope.row)">增加库存</el-button>
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateWarehousingFunc(scope.row)">变更</el-button>
             <el-button type="text" icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
+<!--              v-auth="btnAuth.update"-->
             </template>
         </el-table-column>
         </el-table>
@@ -119,6 +128,11 @@
             <el-option v-for="(item,key) in departmentOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
+        <el-form-item label="收入分类:">
+          <el-select v-model="formData.income_type" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in sortOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="付款方式:">
           <el-select v-model="formData.payment" placeholder="请选择" style="width:100%" clearable>
             <el-option v-for="(item,key) in pay_byOptions" :key="key" :label="item.label" :value="item.value" />
@@ -129,6 +143,9 @@
         </el-form-item>
         <el-form-item label="单位:">
           <el-input v-model="formData.unit" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="成本价:">
+          <el-input-number v-model="formData.cost"  style="width:100%" :precision="2" clearable />
         </el-form-item>
         <el-form-item label="单价:">
           <el-input-number @change="setAmount" v-model="formData.unitPrice"  style="width:100%" :precision="2" clearable />
@@ -144,6 +161,19 @@
         <div class="dialog-footer">
           <el-button size="small" @click="closeDialog">取 消</el-button>
           <el-button size="small" type="primary" @click="enterDialog">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="dialogMarginFormVisible" :before-close="closeMarginDialog" title="弹窗操作">
+      <el-form :model="formMarginData" label-position="right" label-width="80px">
+        <el-form-item label="数量:">
+          <el-input v-model.number="formMarginData.margin" clearable placeholder="请输入" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeMarginDialog">取 消</el-button>
+          <el-button size="small" type="primary" @click="enterMarginDialog">确 定</el-button>
         </div>
       </template>
     </el-dialog>
@@ -163,7 +193,7 @@ import {
   deleteWarehousingByIds,
   updateWarehousing,
   findWarehousing,
-  getWarehousingList, getWarehousingName
+  getWarehousingList, getWarehousingName, getWarehousingExcel, updateWarehousingMargin
 } from '@/api/iymWarehousing'
 
 // 全量引入格式化工具 请按需保留
@@ -172,7 +202,11 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import CustomPic from '@/components/customPic/index.vue'
 import { ref } from 'vue'
 import {upLoad} from "@/api/upload";
-
+import ImageCompress from "@/utils/image";
+import {exportExcel} from "@/api/excel";
+import {createRecharge} from "@/api/umsRecharge";
+import { useBtnAuth } from '@/utils/btnAuth'
+const btnAuth = useBtnAuth()
 // 自动化生成的字典（可能为空）以及字段
 const options = ref([
   {
@@ -186,19 +220,27 @@ const options = ref([
 const foodOptions = ref([])
 const teaOptions = ref([])
 const pay_byOptions = ref([])
+const sortOptions = ref([])
 const departmentOptions = ref([])
+const time = ref()
 const formData = ref({
         imgUrl: '',
         name: '',
         department: '',
         type: undefined,
+        income_type: undefined,
         payment: undefined,
         quantity: 0,
         unit: '',
         unitPrice: 0,
+        cost: 0,
         amount: 0,
         margin: 0,
         remarks: '',
+        })
+const formMarginData = ref({
+        id: 0,
+        margin: 0
         })
 
 // =========== 表格控制部分 ===========
@@ -254,6 +296,7 @@ const setOptions = async () =>{
     foodOptions.value = await getDictFunc('food')
     teaOptions.value = await getDictFunc('tea')
     pay_byOptions.value = await getDictFunc('pay_by')
+  sortOptions.value = await getDictFunc('sort')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -278,6 +321,25 @@ const handleSelectionChange = (val) => {
     multipleSelection.value = val
 }
 
+const handleExcelExport = (fileName) => {
+  time.value = getTime()
+  if (!fileName || typeof fileName !== 'string') {
+    fileName = '入库列表'+ time.value +'.xlsx'
+  }
+  console.log(time.value)
+  getWarehousingExcel(tableData.value, fileName)
+}
+const getTime = () => {
+  // 获取当前时间并打印
+  let time = '';
+  let yy = new Date().getFullYear()
+  let mm = new Date().getMonth() + 1
+  let dd = new Date().getDate()
+  let hh = new Date().getHours()
+  let mf = new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes()
+  time = yy + '_' + mm + '_' + dd + '_' + hh + ':' + mf
+  return time
+}
 // 删除行
 const deleteRow = (row) => {
     ElMessageBox.confirm('确定要删除吗?', '提示', {
@@ -358,11 +420,17 @@ const deleteWarehousingFunc = async (row) => {
 
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
+const dialogMarginFormVisible = ref(false)
 
 // 打开弹窗
 const openDialog = () => {
     type.value = 'create'
     dialogFormVisible.value = true
+}// 打开弹窗
+const openMarginDialog = (row) => {
+    type.value = 'create'
+  formMarginData.value.id = row.ID
+  dialogMarginFormVisible.value = true
 }
 
 // 关闭弹窗
@@ -377,10 +445,19 @@ const closeDialog = () => {
       quantity: 0,
       unit: '',
       unitPrice: 0,
+      cost: 0,
       amount: 0,
       margin: 0,
       remarks: '',
         }
+}
+// 关闭弹窗
+const closeMarginDialog = () => {
+    dialogMarginFormVisible.value = false
+    formMarginData.value = {
+      id: 0,
+      margin: 0,
+    }
 }
 // 弹窗确定
 const enterDialog = async () => {
@@ -407,6 +484,27 @@ const enterDialog = async () => {
         getTableData()
       }
 }
+// 弹窗确定
+const enterMarginDialog = async () => {
+  let res
+  res = await updateWarehousingMargin(formMarginData.value)
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '创建/更改成功'
+    })
+    closeMarginDialog()
+    getTableData()
+  }
+      if (res.code === 0) {
+        ElMessage({
+          type: 'success',
+          message: '创建/更改成功'
+        })
+        closeDialog()
+        getTableData()
+      }
+}
 const wareUpload  = (files) =>  {
   let formFile = new FormData
   console.log(files)
@@ -424,15 +522,17 @@ const wareUpload  = (files) =>  {
 }
 const beforeAvatarUpload= (file) =>  {
   const isJPG = file.type === 'image/jpeg';
-  const isLt2M = file.size / 1024 / 1024 < 10;
-
   if (!isJPG) {
-    this.$message.error('上传头像图片只能是 JPG 格式!');
+    ElMessage.error('上传头像图片只能是 JPG 格式!');
+    return false
   }
-  if (!isLt2M) {
-    this.$message.error('上传头像图片大小不能超过 2MB!');
+  const isRightSize = file.size / 1024 < 10*1024
+  if (!isRightSize) {
+    // 压缩
+    const compress = new ImageCompress(file, 10*1024, 1920)
+    return compress.compress()
   }
-  return isJPG && isLt2M;
+  return isRightSize && isJPG;
 }
 </script>
 <style scoped>
